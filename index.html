@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ZUKA-IN</title>
 
-<!-- LOGIN GOOGLE -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-
 <style>
     body {
         margin: 0;
@@ -25,44 +22,6 @@
         color: white;
         box-shadow: 0 4px 10px rgba(255,255,255,0.15);
         position: relative;
-    }
-
-    /* LOGIN GOOGLE */
-    #google-login-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-        margin-bottom: 10px;
-    }
-
-    #user-profile {
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        display: none;
-        align-items: center;
-        background: rgba(255,255,255,0.1);
-        padding: 10px 15px;
-        border-radius: 12px;
-        backdrop-filter: blur(4px);
-        box-shadow: 0 0 10px rgba(255,255,255,0.2);
-        gap: 10px;
-        z-index: 2000;
-    }
-
-    #user-profile img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-    }
-
-    #logout-btn {
-        background: red;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 8px;
-        color: white;
-        cursor: pointer;
     }
 
     /* 🏠 INICIO */
@@ -271,29 +230,6 @@
     ZUKA-IN
 </header>
 
-<!-- PERFIL DEL USUARIO -->
-<div id="user-profile">
-    <img id="user-pic">
-    <span id="user-name"></span>
-    <button id="logout-btn" onclick="cerrarSesion()">Salir</button>
-</div>
-
-<!-- LOGIN GOOGLE -->
-<div id="google-login-container">
-    <div id="g_id_onload"
-         data-client_id="YOUR_GOOGLE_CLIENT_ID"
-         data-callback="handleCredentialResponse">
-    </div>
-
-    <div class="g_id_signin"
-         data-type="standard"
-         data-size="large"
-         data-theme="outline"
-         data-text="sign_in_with"
-         data-shape="pill">
-    </div>
-</div>
-
 <!-- 🏠 INICIO -->
 <div id="inicio">
     <div id="inicio-buttons">
@@ -371,45 +307,6 @@
 </div>
 
 <script>
-/* LOGIN GOOGLE */
-function handleCredentialResponse(response) {
-    const data = JSON.parse(atob(response.credential.split('.')[1]));
-
-    const user = {
-        name: data.name,
-        pic: data.picture,
-        email: data.email
-    };
-
-    localStorage.setItem("user", JSON.stringify(user));
-    mostrarUsuario();
-}
-
-/* MOSTRAR USUARIO */
-function mostrarUsuario() {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
-
-    document.getElementById("google-login-container").style.display = "none";
-
-    const profile = document.getElementById("user-profile");
-    profile.style.display = "flex";
-
-    document.getElementById("user-name").textContent = user.name;
-    document.getElementById("user-pic").src = user.pic;
-}
-
-/* CERRAR SESIÓN */
-function cerrarSesion() {
-    localStorage.removeItem("user");
-    location.reload();
-}
-
-/* ESTADO DE LOGIN */
-window.onload = function() {
-    mostrarUsuario();
-};
-
 /* NAVEGACIÓN */
 function irA(id) {
     location.hash = id;
