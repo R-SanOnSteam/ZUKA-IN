@@ -230,6 +230,61 @@
     ZUKA-IN
 </header>
 
+<!-- 🔐 LOGIN -->
+<div id="login-box" style="
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.9);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:3000;
+">
+  <div style="
+  background:#000;
+  border:2px solid white;
+  padding:30px;
+  border-radius:20px;
+  width:320px;
+  max-width:90%;
+  text-align:center;
+  box-shadow:0 0 25px rgba(255,255,255,0.25);
+  ">
+    <h2 style="margin-bottom:20px;">Iniciar sesión</h2>
+
+    <input id="email" placeholder="Email"
+      style="width:90%;padding:12px;margin-bottom:10px;border-radius:8px;border:none">
+
+    <input id="password" type="password" placeholder="Contraseña"
+      style="width:90%;padding:12px;margin-bottom:15px;border-radius:8px;border:none">
+
+    <button onclick="login()"
+      style="width:95%;padding:14px;border-radius:14px;font-size:18px;border:none;cursor:pointer;">
+      Entrar
+    </button>
+
+    <p style="margin-top:12px;">
+      <span style="cursor:pointer;text-decoration:underline" onclick="registro()">
+        Crear cuenta
+      </span>
+    </p>
+  </div>
+</div>
+
+<!-- BOTÓN LOGOUT -->
+<button id="logoutBtn" onclick="logout()" style="
+position:fixed;
+top:15px;
+right:15px;
+padding:10px 18px;
+border-radius:16px;
+border:none;
+font-weight:bold;
+display:none;
+cursor:pointer;">
+  Salir
+</button>
+
 <!-- 🏠 INICIO -->
 <div id="inicio">
     <div id="inicio-buttons">
@@ -343,6 +398,63 @@ function abrirModal(src){
 function cerrarModal(){
     document.getElementById("modal").style.display = "none";
 }
+
+/* ------- LOGIN SYSTEM -------- */
+function login(){
+    const email = document.getElementById("email").value.trim();
+    const pass  = document.getElementById("password").value.trim();
+
+    if(!email || !pass){
+        alert("Completa todos los campos");
+        return;
+    }
+
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if(user && user.email === email && user.pass === pass){
+        iniciarSesion();
+    } else {
+        alert("Usuario o contraseña incorrecta");
+    }
+}
+
+function registro(){
+    const email = document.getElementById("email").value.trim();
+    const pass  = document.getElementById("password").value.trim();
+
+    if(!email || !pass){
+        alert("Completa email y contraseña");
+        return;
+    }
+
+    localStorage.setItem("user", JSON.stringify({
+        email: email,
+        pass: pass
+    }));
+
+    iniciarSesion();
+}
+
+function iniciarSesion(){
+    sessionStorage.setItem("login","true");
+
+    document.getElementById("login-box").style.display = "none";
+    document.getElementById("logoutBtn").style.display = "block";
+}
+
+function logout(){
+    sessionStorage.removeItem("login");
+    location.reload();
+}
+
+window.addEventListener("load", ()=>{
+    const logueado = sessionStorage.getItem("login");
+
+    if(logueado){
+        document.getElementById("login-box").style.display = "none";
+        document.getElementById("logoutBtn").style.display = "block";
+    }
+});
 </script>
 
 </body>
