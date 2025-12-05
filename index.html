@@ -250,7 +250,7 @@ z-index:3000;
   text-align:center;
   box-shadow:0 0 25px rgba(255,255,255,0.25);
   ">
-    <h2 style="margin-bottom:20px;">Iniciar sesión</h2>
+    <h2 id="login-title" style="margin-bottom:20px;">Iniciar sesión</h2>
 
     <input id="email" placeholder="Email"
       style="width:90%;padding:12px;margin-bottom:10px;border-radius:8px;border:none">
@@ -258,13 +258,25 @@ z-index:3000;
     <input id="password" type="password" placeholder="Contraseña"
       style="width:90%;padding:12px;margin-bottom:15px;border-radius:8px;border:none">
 
-    <button onclick="login()"
+    <!-- CAMPOS EXTRA PARA REGISTRO -->
+    <div id="registro-extra" style="display:none; margin-top:5px;">
+      <input id="nombre" placeholder="Nombre"
+        style="width:90%;padding:12px;margin-bottom:8px;border-radius:8px;border:none">
+
+      <input id="apellido" placeholder="Apellido"
+        style="width:90%;padding:12px;margin-bottom:8px;border-radius:8px;border:none">
+
+      <input id="username" placeholder="Nombre de usuario"
+        style="width:90%;padding:12px;margin-bottom:8px;border-radius:8px;border:none">
+    </div>
+
+    <button id="authBtn" onclick="authSubmit()"
       style="width:95%;padding:14px;border-radius:14px;font-size:18px;border:none;cursor:pointer;">
       Entrar
     </button>
 
     <p style="margin-top:12px;">
-      <span style="cursor:pointer;text-decoration:underline" onclick="registro()">
+      <span id="toggleAuthMode" style="cursor:pointer;text-decoration:underline" onclick="toggleModoAuth()">
         Crear cuenta
       </span>
     </p>
@@ -414,8 +426,39 @@ function cerrarModal(){
 
 /* ------- LOGIN SYSTEM -------- */
 
+let modoAuth = "login"; // "login" o "registro"
+
 function abrirLogin(){
     document.getElementById("login-box").style.display = "flex";
+}
+
+function toggleModoAuth(){
+    const extra   = document.getElementById("registro-extra");
+    const title   = document.getElementById("login-title");
+    const btn     = document.getElementById("authBtn");
+    const toggle  = document.getElementById("toggleAuthMode");
+
+    if(modoAuth === "login"){
+        modoAuth = "registro";
+        extra.style.display = "block";
+        title.textContent   = "Crear cuenta";
+        btn.textContent     = "Crear cuenta";
+        toggle.textContent  = "Ya tengo cuenta";
+    } else {
+        modoAuth = "login";
+        extra.style.display = "none";
+        title.textContent   = "Iniciar sesión";
+        btn.textContent     = "Entrar";
+        toggle.textContent  = "Crear cuenta";
+    }
+}
+
+function authSubmit(){
+    if(modoAuth === "login"){
+        login();
+    } else {
+        registro();
+    }
 }
 
 function login(){
@@ -423,7 +466,7 @@ function login(){
     const pass  = document.getElementById("password").value.trim();
 
     if(!email || !pass){
-        alert("Completa todos los campos");
+        alert("Completa email y contraseña");
         return;
     }
 
@@ -437,18 +480,26 @@ function login(){
 }
 
 function registro(){
-    const email = document.getElementById("email").value.trim();
-    const pass  = document.getElementById("password").value.trim();
+    const email    = document.getElementById("email").value.trim();
+    const pass     = document.getElementById("password").value.trim();
+    const nombre   = document.getElementById("nombre").value.trim();
+    const apellido = document.getElementById("apellido").value.trim();
+    const username = document.getElementById("username").value.trim();
 
-    if(!email || !pass){
-        alert("Completa email y contraseña");
+    if(!nombre || !apellido || !username || !email || !pass){
+        alert("Completa todos los campos para crear la cuenta");
         return;
     }
 
-    localStorage.setItem("user", JSON.stringify({
+    const userData = {
         email: email,
-        pass: pass
-    }));
+        pass:  pass,
+        nombre: nombre,
+        apellido: apellido,
+        username: username
+    };
+
+    localStorage.setItem("user", JSON.stringify(userData));
 
     iniciarSesion();
 }
@@ -470,12 +521,10 @@ window.addEventListener("load", ()=>{
     const logueado = sessionStorage.getItem("login");
 
     if(logueado){
-        // Usuario ya logueado en esta pestaña
         document.getElementById("login-box").style.display = "none";
         document.getElementById("logoutBtn").style.display = "block";
         document.getElementById("loginOpenBtn").style.display = "none";
     } else {
-        // No logueado: solo mostrar botón "Iniciar sesión"
         document.getElementById("login-box").style.display = "none";
         document.getElementById("logoutBtn").style.display = "none";
         document.getElementById("loginOpenBtn").style.display = "block";
