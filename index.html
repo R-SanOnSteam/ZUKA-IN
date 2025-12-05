@@ -334,12 +334,13 @@ box-shadow:0 0 15px rgba(255,255,255,0.2);
        style="width:55px;height:55px;border-radius:50%;border:2px solid white">
 
       <div>
-          <strong id="perfilUsername">@user</strong><br>
-          <small id="perfilNombre">Nombre Apellido</small>
+          <!-- ✅ SOLO USERNAME -->
+          <strong id="perfilUsername">@user</strong>
       </div>
   </div>
 
-  <p style="font-size:14px" id="perfilEmail">correo@email.com</p>
+  <!-- ❌ YA NO HAY CORREO NI NOMBRE -->
+  <!-- <p style="font-size:14px" id="perfilEmail">correo@email.com</p> -->
 
   <button onclick="logout()" style="
   width:100%;
@@ -602,43 +603,35 @@ window.togglePerfil = function(){
     box.style.display = box.style.display === "block" ? "none" : "block";
 };
 
-/* ✅ FUNCIÓN CORREGIDA: usa el username que puso el usuario */
+/* ✅ FUNCIÓN PERFIL SOLO USERNAME */
 function cargarPerfil(user){
     if (!user) return;
 
     const extra = JSON.parse(localStorage.getItem("userProfileExtra") || "null");
 
     let username = "";
-    let nombreCompleto = "";
 
-    // 1️⃣ Primero lo que guardaste al registrarse
-    if (extra) {
-        if (extra.username) {
-            username = extra.username;
-        }
-        if (extra.nombre || extra.apellido) {
-            nombreCompleto = (extra.nombre || "") + " " + (extra.apellido || "");
-        }
+    // 1️⃣ username guardado en localStorage
+    if (extra && extra.username) {
+        username = extra.username;
     }
 
-    // 2️⃣ Luego displayName de Firebase
+    // 2️⃣ si no, displayName de Firebase
     if (!username && user.displayName) {
         username = user.displayName;
     }
 
-    // 3️⃣ Si no hay nada, parte del correo
+    // 3️⃣ si no, parte del correo
     if (!username && user.email) {
         username = user.email.split("@")[0];
     }
 
-    // 4️⃣ Último recurso
+    // 4️⃣ fallback
     if (!username) {
         username = "user";
     }
 
     document.getElementById("perfilUsername").textContent = "@" + username;
-    document.getElementById("perfilNombre").textContent   = nombreCompleto.trim();
-    document.getElementById("perfilEmail").textContent    = user.email || "";
 }
 
 /* ===============  LOGOUT  =============== */
