@@ -161,7 +161,7 @@
         backdrop-filter: blur(3px);
         justify-content: center;
         align-items: center;
-        z-index: 1000;
+        z-index: 9998;
     }
 
     #modal img {
@@ -172,13 +172,15 @@
     }
 
     #modal-close {
-        position: absolute;
-        top: 25px;
-        right: 35px;
-        font-size: 40px;
-        color: white;
-        cursor: pointer;
-    }
+    position: absolute;
+    top: 25px;
+    right: 35px;
+    font-size: 40px;
+    color: white;
+    cursor: pointer;
+    z-index: 9999;
+}
+
 
     /* 📱 MÓVIL */
     @media (max-width: 899px) {
@@ -439,8 +441,10 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  updateProfile
+  updateProfile,
+  sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyC5_uT5UamAEd7mDQFsI4xRFYw6GzCQ8Eg",
@@ -566,17 +570,22 @@ async function registro(){
     try{
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
 
-        // guardamos username como displayName en Firebase
+        // Guardamos displayName como username
         await updateProfile(cred.user, {
             displayName: username
         });
 
-        // guardamos nombre+apellido+username en localStorage para mostrar
+        // Guardar datos extra en localStorage
         localStorage.setItem("userProfileExtra", JSON.stringify({
             nombre,
             apellido,
             username
         }));
+
+        // 🔥 ENVIAR EMAIL DE VERIFICACIÓN
+        await sendEmailVerification(cred.user);
+
+        alert("Cuenta creada con éxito. Revisa tu correo para verificar tu cuenta.");
 
         document.getElementById("login-box").style.display = "none";
 
@@ -586,12 +595,13 @@ async function registro(){
         } else if (err.code === "auth/email-already-in-use") {
             alert("Este correo ya está registrado. Prueba iniciando sesión.");
         } else if (err.code === "auth/invalid-email") {
-            alert("El correo no es válido.");
+            alert("El correo no tiene un formato válido.");
         } else {
             alert("Error al crear la cuenta: " + (err.code || err.message));
         }
     }
 }
+
 
 /* ===============  PERFIL (AVATAR + PANEL)  =============== */
 
