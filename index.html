@@ -296,20 +296,66 @@ cursor:pointer;">
   Iniciar sesión
 </button>
 
-<!-- BOTÓN LOGOUT -->
-<button id="logoutBtn" onclick="logout()" style="
+<!-- AVATAR PERFIL -->
+<img id="perfilAvatar" src="avatar.png" onclick="togglePerfil()" style="
 position:fixed;
-top:15px;
+top:12px;
 right:15px;
-padding:10px 18px;
-border-radius:16px;
-border:none;
-font-weight:bold;
+width:42px;
+height:42px;
+border-radius:50%;
+border:2px solid white;
+cursor:pointer;
 display:none;
-cursor:pointer;">
+object-fit:cover;
+z-index:2000;
+">
   Salir
 </button>
 
+<!-- PANEL PERFIL -->
+<div id="perfilBox" style="
+position:fixed;
+top:65px;
+right:15px;
+width:260px;
+background:black;
+border:2px solid white;
+border-radius:16px;
+padding:14px;
+color:white;
+display:none;
+z-index:2000;
+box-shadow:0 0 15px rgba(255,255,255,0.2);
+">
+
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+    <img id="perfilAvatarLarge" src="avatar.png"
+     style="width:55px;height:55px;border-radius:50%;border:2px solid white">
+
+    <div>
+        <strong id="perfilUsername">@user</strong><br>
+        <small id="perfilNombre">Nombre Apellido</small>
+    </div>
+</div>
+
+<p style="font-size:14px" id="perfilEmail">correo@email.com</p>
+
+<button onclick="logout()" style="
+width:100%;
+margin-top:10px;
+padding:10px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-weight:bold;
+">
+Cerrar sesión
+</button>
+
+</div>
+
+    
 <!-- 🏠 INICIO -->
 <div id="inicio">
     <div id="inicio-buttons">
@@ -508,9 +554,13 @@ function iniciarSesion(){
     sessionStorage.setItem("login","true");
 
     document.getElementById("login-box").style.display = "none";
-    document.getElementById("logoutBtn").style.display = "block";
     document.getElementById("loginOpenBtn").style.display = "none";
+
+    document.getElementById("perfilAvatar").style.display = "block";
+
+    cargarPerfil();
 }
+
 
 function logout(){
     sessionStorage.removeItem("login");
@@ -522,14 +572,34 @@ window.addEventListener("load", ()=>{
 
     if(logueado){
         document.getElementById("login-box").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "block";
+        document.getElementById("perfilAvatar").style.display = "block";
         document.getElementById("loginOpenBtn").style.display = "none";
+
+        cargarPerfil();
+
     } else {
+
         document.getElementById("login-box").style.display = "none";
-        document.getElementById("logoutBtn").style.display = "none";
+        document.getElementById("perfilAvatar").style.display = "none";
         document.getElementById("loginOpenBtn").style.display = "block";
     }
 });
+
+    function togglePerfil(){
+    const box = document.getElementById("perfilBox");
+    box.style.display = box.style.display === "block" ? "none" : "block";
+}
+
+/* RELLENA LOS DATOS DEL PERFIL */
+function cargarPerfil(){
+    const user = JSON.parse(localStorage.getItem("user"));
+    if(!user) return;
+
+    document.getElementById("perfilUsername").textContent = "@"+user.username;
+    document.getElementById("perfilNombre").textContent   = user.nombre + " " + user.apellido;
+    document.getElementById("perfilEmail").textContent    = user.email;
+}
+
 </script>
 
 </body>
