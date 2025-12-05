@@ -230,7 +230,7 @@
     ZUKA-IN
 </header>
 
-<!-- 🔐 LOGIN (OCULTO HASTA QUE SE APRIETE EL BOTÓN) -->
+<!-- 🔐 LOGIN (MODAL) -->
 <div id="login-box" style="
 position:fixed;
 inset:0;
@@ -292,7 +292,8 @@ padding:10px 18px;
 border-radius:16px;
 border:none;
 font-weight:bold;
-cursor:pointer;">
+cursor:pointer;
+z-index:1500;">
   Iniciar sesión
 </button>
 
@@ -310,8 +311,6 @@ display:none;
 object-fit:cover;
 z-index:2000;
 ">
-  Salir
-</button>
 
 <!-- PANEL PERFIL -->
 <div id="perfilBox" style="
@@ -329,33 +328,31 @@ z-index:2000;
 box-shadow:0 0 15px rgba(255,255,255,0.2);
 ">
 
-<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
-    <img id="perfilAvatarLarge" src="avatar.png"
-     style="width:55px;height:55px;border-radius:50%;border:2px solid white">
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+      <img id="perfilAvatarLarge" src="avatar.png"
+       style="width:55px;height:55px;border-radius:50%;border:2px solid white">
 
-    <div>
-        <strong id="perfilUsername">@user</strong><br>
-        <small id="perfilNombre">Nombre Apellido</small>
-    </div>
+      <div>
+          <strong id="perfilUsername">@user</strong><br>
+          <small id="perfilNombre">Nombre Apellido</small>
+      </div>
+  </div>
+
+  <p style="font-size:14px" id="perfilEmail">correo@email.com</p>
+
+  <button onclick="logout()" style="
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:bold;
+  ">
+  Cerrar sesión
+  </button>
 </div>
 
-<p style="font-size:14px" id="perfilEmail">correo@email.com</p>
-
-<button onclick="logout()" style="
-width:100%;
-margin-top:10px;
-padding:10px;
-border:none;
-border-radius:12px;
-cursor:pointer;
-font-weight:bold;
-">
-Cerrar sesión
-</button>
-
-</div>
-
-    
 <!-- 🏠 INICIO -->
 <div id="inicio">
     <div id="inicio-buttons">
@@ -432,11 +429,35 @@ Cerrar sesión
     <img id="modal-img" alt="Ampliado">
 </div>
 
-<script>
-/* NAVEGACIÓN */
-function irA(id) {
+<!-- SCRIPT PRINCIPAL CON FIREBASE (MÓDULO) -->
+<script type="module">
+/* ==================  FIREBASE SETUP  ================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC5_uT5UamAEd7mDQFsI4xRFYw6GzCQ8Eg",
+  authDomain: "zuka-in.firebaseapp.com",
+  projectId: "zuka-in",
+  storageBucket: "zuka-in.firebasestorage.app",
+  messagingSenderId: "940485991654",
+  appId: "1:940485991654:web:67852a8668c30ff1e62f27"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+/* ===============  NAVEGACIÓN DE SECCIONES  =============== */
+window.irA = function(id) {
     location.hash = id;
-}
+};
 
 function actualizarVistaDesdeHash() {
     const raw = location.hash.replace("#", "");
@@ -461,24 +482,24 @@ function actualizarVistaDesdeHash() {
 window.addEventListener("hashchange", actualizarVistaDesdeHash);
 window.addEventListener("load", actualizarVistaDesdeHash);
 
-/* MODAL IMAGEN */
-function abrirModal(src){
+/* ===============  MODAL IMAGEN  =============== */
+window.abrirModal = function(src){
     document.getElementById("modal-img").src = src;
     document.getElementById("modal").style.display = "flex";
-}
-function cerrarModal(){
+};
+window.cerrarModal = function(){
     document.getElementById("modal").style.display = "none";
-}
+};
 
-/* ------- LOGIN SYSTEM -------- */
+/* ===============  LOGIN UI  =============== */
 
 let modoAuth = "login"; // "login" o "registro"
 
-function abrirLogin(){
+window.abrirLogin = function(){
     document.getElementById("login-box").style.display = "flex";
-}
+};
 
-function toggleModoAuth(){
+window.toggleModoAuth = function(){
     const extra   = document.getElementById("registro-extra");
     const title   = document.getElementById("login-title");
     const btn     = document.getElementById("authBtn");
@@ -497,17 +518,19 @@ function toggleModoAuth(){
         btn.textContent     = "Entrar";
         toggle.textContent  = "Crear cuenta";
     }
-}
+};
 
-function authSubmit(){
+window.authSubmit = function(){
     if(modoAuth === "login"){
         login();
     } else {
         registro();
     }
-}
+};
 
-function login(){
+/* ===============  FUNCIONES AUTH (FIREBASE)  =============== */
+
+async function login(){
     const email = document.getElementById("email").value.trim();
     const pass  = document.getElementById("password").value.trim();
 
@@ -516,16 +539,15 @@ function login(){
         return;
     }
 
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    if(user && user.email === email && user.pass === pass){
-        iniciarSesion();
-    } else {
-        alert("Usuario o contraseña incorrecta");
+    try{
+        await signInWithEmailAndPassword(auth, email, pass);
+        document.getElementById("login-box").style.display = "none";
+    } catch (err){
+        alert("Error al iniciar sesión: " + (err.code || err.message));
     }
 }
 
-function registro(){
+async function registro(){
     const email    = document.getElementById("email").value.trim();
     const pass     = document.getElementById("password").value.trim();
     const nombre   = document.getElementById("nombre").value.trim();
@@ -537,69 +559,77 @@ function registro(){
         return;
     }
 
-    const userData = {
-        email: email,
-        pass:  pass,
-        nombre: nombre,
-        apellido: apellido,
-        username: username
-    };
+    try{
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
 
-    localStorage.setItem("user", JSON.stringify(userData));
+        // guardamos username como displayName en Firebase
+        await updateProfile(cred.user, {
+            displayName: username
+        });
 
-    iniciarSesion();
-}
-
-function iniciarSesion(){
-    sessionStorage.setItem("login","true");
-
-    document.getElementById("login-box").style.display = "none";
-    document.getElementById("loginOpenBtn").style.display = "none";
-
-    document.getElementById("perfilAvatar").style.display = "block";
-
-    cargarPerfil();
-}
-
-
-function logout(){
-    sessionStorage.removeItem("login");
-    location.reload();
-}
-
-window.addEventListener("load", ()=>{
-    const logueado = sessionStorage.getItem("login");
-
-    if(logueado){
-        document.getElementById("login-box").style.display = "none";
-        document.getElementById("perfilAvatar").style.display = "block";
-        document.getElementById("loginOpenBtn").style.display = "none";
-
-        cargarPerfil();
-
-    } else {
+        // opcional: guardamos nombre+apellido en localStorage solo para mostrar
+        localStorage.setItem("userProfileExtra", JSON.stringify({
+            nombre,
+            apellido
+        }));
 
         document.getElementById("login-box").style.display = "none";
-        document.getElementById("perfilAvatar").style.display = "none";
-        document.getElementById("loginOpenBtn").style.display = "block";
+
+    } catch (err){
+        alert("Error al crear la cuenta: " + (err.code || err.message));
     }
-});
+}
 
-    function togglePerfil(){
+/* ===============  PERFIL (AVATAR + PANEL)  =============== */
+
+window.togglePerfil = function(){
     const box = document.getElementById("perfilBox");
     box.style.display = box.style.display === "block" ? "none" : "block";
-}
+};
 
-/* RELLENA LOS DATOS DEL PERFIL */
-function cargarPerfil(){
-    const user = JSON.parse(localStorage.getItem("user"));
+function cargarPerfil(user){
     if(!user) return;
 
-    document.getElementById("perfilUsername").textContent = "@"+user.username;
-    document.getElementById("perfilNombre").textContent   = user.nombre + " " + user.apellido;
-    document.getElementById("perfilEmail").textContent    = user.email;
+    const extra = JSON.parse(localStorage.getItem("userProfileExtra") || "null");
+
+    const username = user.displayName || (extra ? extra.username : "user");
+    const nombreCompleto = extra ? (extra.nombre + " " + extra.apellido) : "";
+
+    document.getElementById("perfilUsername").textContent = "@"+username;
+    document.getElementById("perfilNombre").textContent   = nombreCompleto;
+    document.getElementById("perfilEmail").textContent    = user.email || "";
 }
 
+/* ===============  LOGOUT  =============== */
+
+window.logout = async function(){
+    try{
+        await signOut(auth);
+        document.getElementById("perfilBox").style.display = "none";
+    } catch (err){
+        alert("Error al cerrar sesión: " + (err.code || err.message));
+    }
+};
+
+/* ===============  REACCIÓN AL ESTADO DE AUTH  =============== */
+
+onAuthStateChanged(auth, (user)=>{
+    const loginOpenBtn = document.getElementById("loginOpenBtn");
+    const avatar       = document.getElementById("perfilAvatar");
+
+    if(user){
+        // logueado
+        loginOpenBtn.style.display = "none";
+        avatar.style.display       = "block";
+
+        cargarPerfil(user);
+    } else {
+        // no logueado
+        loginOpenBtn.style.display = "block";
+        avatar.style.display       = "none";
+        document.getElementById("perfilBox").style.display = "none";
+    }
+});
 </script>
 
 </body>
