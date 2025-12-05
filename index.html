@@ -41,6 +41,8 @@
     #inicio-buttons {
         display: flex;
         gap: 40px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     /* BOTONES */
@@ -181,7 +183,87 @@
         z-index: 9999;
     }
 
-    /* 📱 MÓVIL */
+    /* PERFIL PÁGINA */
+    .perfil-page-container {
+        max-width: 800px;
+        margin: 30px auto 0;
+        padding: 20px;
+        border-radius: 18px;
+        border: 2px solid white;
+        background: rgba(255,255,255,0.03);
+        box-shadow: 0 0 20px rgba(255,255,255,0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .perfil-page-top {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .perfil-page-avatar-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #perfilPageAvatar {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        border: 3px solid white;
+        object-fit: cover;
+    }
+
+    .perfil-page-fields p {
+        margin: 6px 0;
+        font-size: 18px;
+    }
+
+    .perfil-page-fields strong {
+        margin-right: 6px;
+    }
+
+    .perfil-edit-btn,
+    .perfil-save-btn,
+    .perfil-cancel-btn,
+    .perfil-foto-btn {
+        background: white;
+        color: black;
+        border: none;
+        border-radius: 14px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        box-shadow: 0 4px 10px rgba(255,255,255,0.18);
+    }
+
+    .perfil-edit-btn:hover,
+    .perfil-save-btn:hover,
+    .perfil-cancel-btn:hover,
+    .perfil-foto-btn:hover {
+        transform: scale(1.04);
+    }
+
+    #perfilEditForm {
+        border-top: 1px solid rgba(255,255,255,0.2);
+        padding-top: 15px;
+    }
+
+    #perfilEditForm input {
+        width: 100%;
+        max-width: 320px;
+        padding: 10px;
+        margin: 6px 0;
+        border-radius: 8px;
+        border: none;
+    }
+
     @media (max-width: 899px) {
 
         #inicio {
@@ -221,6 +303,10 @@
             flex-direction: column;
             gap: 25px;
         }
+
+        .perfil-page-container {
+            margin-inline: 20px;
+        }
     }
 </style>
 
@@ -250,7 +336,18 @@ z-index:3000;
   max-width:90%;
   text-align:center;
   box-shadow:0 0 25px rgba(255,255,255,0.25);
+  position:relative;
   ">
+    <!-- ❌ Botón cerrar login -->
+    <span onclick="cerrarLogin()" style="
+      position:absolute;
+      top:8px;
+      right:12px;
+      font-size:26px;
+      cursor:pointer;
+      color:white;
+    ">×</span>
+
     <h2 id="login-title" style="margin-bottom:20px;">Iniciar sesión</h2>
 
     <input id="email" placeholder="Email"
@@ -313,7 +410,7 @@ object-fit:cover;
 z-index:2000;
 ">
 
-<!-- PANEL PERFIL -->
+<!-- PANEL PERFIL (popup pequeño) -->
 <div id="perfilBox" style="
 position:fixed;
 top:65px;
@@ -334,17 +431,26 @@ box-shadow:0 0 15px rgba(255,255,255,0.2);
        style="width:55px;height:55px;border-radius:50%;border:2px solid white">
 
       <div>
-          <!-- ✅ SOLO USERNAME -->
+          <!-- Solo @username aquí -->
           <strong id="perfilUsername">@user</strong>
       </div>
   </div>
 
-  <!-- ❌ YA NO HAY CORREO NI NOMBRE -->
-  <!-- <p style="font-size:14px" id="perfilEmail">correo@email.com</p> -->
+  <button onclick="irA('perfil')" style="
+    width:100%;
+    margin-bottom:8px;
+    padding:8px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+  ">
+    Ver perfil
+  </button>
 
   <button onclick="logout()" style="
   width:100%;
-  margin-top:10px;
+  margin-top:4px;
   padding:10px;
   border:none;
   border-radius:12px;
@@ -360,6 +466,8 @@ box-shadow:0 0 15px rgba(255,255,255,0.2);
     <div id="inicio-buttons">
         <button class="btn" onclick="irA('dibujos')">DIBUJOS</button>
         <button class="btn" onclick="irA('fotos')">FOTOS</button>
+        <!-- Botón Perfil en el inicio -->
+        <button class="btn" onclick="irA('perfil')">PERFIL</button>
     </div>
 </div>
 
@@ -390,6 +498,49 @@ box-shadow:0 0 15px rgba(255,255,255,0.2);
     <div class="volver-container">
         <button class="volver-btn" onclick="irA('inicio')">Volver al inicio</button>
         <button class="contact-btn">Contactame</button>
+    </div>
+</section>
+
+<!-- 👤 PERFIL PÁGINA -->
+<section id="perfil" class="section">
+    <h2>Mi perfil</h2>
+    <p id="perfilAviso" style="text-align:center;margin-top:8px;color:#ccc;font-size:14px;">
+        Debes iniciar sesión para ver y editar tu perfil.
+    </p>
+
+    <div class="perfil-page-container" id="perfilPageCard" style="display:none;">
+
+        <div class="perfil-page-top">
+            <div class="perfil-page-avatar-wrap">
+                <img id="perfilPageAvatar" src="avatar.png" alt="Avatar">
+                <button type="button" class="perfil-foto-btn" id="cambiarFotoBtn">Cambiar foto</button>
+                <input type="file" id="fotoInput" accept="image/*" style="display:none">
+            </div>
+
+            <div class="perfil-page-fields">
+                <p><strong>Nombre:</strong> <span id="perfilPageNombre">-</span></p>
+                <p><strong>Apellido:</strong> <span id="perfilPageApellido">-</span></p>
+                <p><strong>Correo:</strong> <span id="perfilPageEmail">-</span></p>
+                <p><strong>Usuario:</strong> <span id="perfilPageUsername">@user</span></p>
+                <button type="button" class="perfil-edit-btn" id="editarPerfilBtn">Editar</button>
+            </div>
+        </div>
+
+        <div id="perfilEditForm" style="display:none;">
+            <h3>Editar perfil</h3>
+            <input id="editNombre" placeholder="Nuevo nombre">
+            <input id="editApellido" placeholder="Nuevo apellido">
+            <input id="editUsername" placeholder="Nuevo nombre de usuario">
+
+            <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="button" class="perfil-save-btn" id="guardarPerfilBtn">Guardar cambios</button>
+                <button type="button" class="perfil-cancel-btn" id="cancelarPerfilBtn">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="volver-container" style="margin-top:36px;">
+        <button class="volver-btn" onclick="irA('inicio')">Volver al inicio</button>
     </div>
 </section>
 
@@ -501,6 +652,10 @@ window.abrirLogin = function(){
     document.getElementById("login-box").style.display = "flex";
 };
 
+window.cerrarLogin = function(){
+    document.getElementById("login-box").style.display = "none";
+};
+
 window.toggleModoAuth = function(){
     const extra   = document.getElementById("registro-extra");
     const title   = document.getElementById("login-title");
@@ -603,7 +758,20 @@ window.togglePerfil = function(){
     box.style.display = box.style.display === "block" ? "none" : "block";
 };
 
-/* ✅ FUNCIÓN PERFIL SOLO USERNAME */
+function cargarAvatar(){
+    const dataUrl = localStorage.getItem("userAvatar");
+    const src = dataUrl || "avatar.png";
+
+    const small = document.getElementById("perfilAvatar");
+    const large = document.getElementById("perfilAvatarLarge");
+    const page  = document.getElementById("perfilPageAvatar");
+
+    if (small) small.src = src;
+    if (large) large.src = src;
+    if (page)  page.src  = src;
+}
+
+/* Función perfil del popup: solo @username */
 function cargarPerfil(user){
     if (!user) return;
 
@@ -611,27 +779,45 @@ function cargarPerfil(user){
 
     let username = "";
 
-    // 1️⃣ username guardado en localStorage
     if (extra && extra.username) {
         username = extra.username;
-    }
-
-    // 2️⃣ si no, displayName de Firebase
-    if (!username && user.displayName) {
+    } else if (user.displayName) {
         username = user.displayName;
-    }
-
-    // 3️⃣ si no, parte del correo
-    if (!username && user.email) {
+    } else if (user.email) {
         username = user.email.split("@")[0];
-    }
-
-    // 4️⃣ fallback
-    if (!username) {
+    } else {
         username = "user";
     }
 
     document.getElementById("perfilUsername").textContent = "@" + username;
+}
+
+/* PERFIL PÁGINA (sección #perfil) */
+function actualizarPerfilPagina(user){
+    const aviso   = document.getElementById("perfilAviso");
+    const card    = document.getElementById("perfilPageCard");
+
+    if (!aviso || !card) return;
+
+    if (!user) {
+        aviso.style.display = "block";
+        card.style.display  = "none";
+        return;
+    }
+
+    aviso.style.display = "none";
+    card.style.display  = "flex";
+
+    const extra = JSON.parse(localStorage.getItem("userProfileExtra") || "null");
+
+    let nombre   = extra?.nombre   || "";
+    let apellido = extra?.apellido || "";
+    let username = extra?.username || user.displayName || (user.email ? user.email.split("@")[0] : "user");
+
+    document.getElementById("perfilPageNombre").textContent   = nombre || "-";
+    document.getElementById("perfilPageApellido").textContent = apellido || "-";
+    document.getElementById("perfilPageEmail").textContent    = user.email || "-";
+    document.getElementById("perfilPageUsername").textContent = "@" + username;
 }
 
 /* ===============  LOGOUT  =============== */
@@ -645,6 +831,84 @@ window.logout = async function(){
     }
 };
 
+/* ===============  EVENTOS PERFIL PÁGINA  =============== */
+
+const editarPerfilBtn   = document.getElementById("editarPerfilBtn");
+const guardarPerfilBtn  = document.getElementById("guardarPerfilBtn");
+const cancelarPerfilBtn = document.getElementById("cancelarPerfilBtn");
+const cambiarFotoBtn    = document.getElementById("cambiarFotoBtn");
+const fotoInput         = document.getElementById("fotoInput");
+
+if (editarPerfilBtn) {
+    editarPerfilBtn.addEventListener("click", () => {
+        const user  = auth.currentUser;
+        const extra = JSON.parse(localStorage.getItem("userProfileExtra") || "null") || {};
+
+        document.getElementById("editNombre").value   = extra.nombre   || "";
+        document.getElementById("editApellido").value = extra.apellido || "";
+        document.getElementById("editUsername").value = extra.username || (user?.displayName || "");
+        document.getElementById("perfilEditForm").style.display = "block";
+    });
+}
+
+if (cancelarPerfilBtn) {
+    cancelarPerfilBtn.addEventListener("click", () => {
+        document.getElementById("perfilEditForm").style.display = "none";
+    });
+}
+
+if (guardarPerfilBtn) {
+    guardarPerfilBtn.addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (!user) {
+            alert("Debes iniciar sesión para editar tu perfil.");
+            return;
+        }
+
+        const nuevoNombre   = document.getElementById("editNombre").value.trim();
+        const nuevoApellido = document.getElementById("editApellido").value.trim();
+        const nuevoUsername = document.getElementById("editUsername").value.trim();
+
+        const extra = JSON.parse(localStorage.getItem("userProfileExtra") || "{}");
+
+        if (nuevoNombre)   extra.nombre   = nuevoNombre;
+        if (nuevoApellido) extra.apellido = nuevoApellido;
+        if (nuevoUsername) extra.username = nuevoUsername;
+
+        localStorage.setItem("userProfileExtra", JSON.stringify(extra));
+
+        try{
+            if (nuevoUsername) {
+                await updateProfile(user, { displayName: nuevoUsername });
+            }
+        } catch(e){
+            console.error("Error al actualizar displayName:", e);
+        }
+
+        cargarPerfil(user);
+        actualizarPerfilPagina(user);
+        document.getElementById("perfilEditForm").style.display = "none";
+    });
+}
+
+if (cambiarFotoBtn && fotoInput) {
+    cambiarFotoBtn.addEventListener("click", () => {
+        fotoInput.click();
+    });
+
+    fotoInput.addEventListener("change", () => {
+        const file = fotoInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            localStorage.setItem("userAvatar", reader.result);
+            cargarAvatar();
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 /* ===============  REACCIÓN AL ESTADO DE AUTH  =============== */
 
 onAuthStateChanged(auth, (user)=>{
@@ -657,11 +921,14 @@ onAuthStateChanged(auth, (user)=>{
         avatar.style.display       = "block";
 
         cargarPerfil(user);
+        cargarAvatar();
+        actualizarPerfilPagina(user);
     } else {
         // no logueado
         loginOpenBtn.style.display = "block";
         avatar.style.display       = "none";
         document.getElementById("perfilBox").style.display = "none";
+        actualizarPerfilPagina(null);
     }
 });
 </script>
