@@ -285,7 +285,7 @@ z-index:3000;
 
 <!-- BOTÓN ABRIR LOGIN -->
 <button id="loginOpenBtn" onclick="abrirLogin()" style="
-position:fixed;
+position:absolute;
 top:15px;
 right:15px;
 padding:10px 18px;
@@ -297,9 +297,10 @@ z-index:1500;">
   Iniciar sesión
 </button>
 
+
 <!-- AVATAR PERFIL -->
 <img id="perfilAvatar" src="avatar.png" onclick="togglePerfil()" style="
-position:fixed;
+position:absolute;
 top:12px;
 right:15px;
 width:42px;
@@ -311,6 +312,7 @@ display:none;
 object-fit:cover;
 z-index:2000;
 ">
+
 
 <!-- PANEL PERFIL -->
 <div id="perfilBox" style="
@@ -543,9 +545,17 @@ async function login(){
         await signInWithEmailAndPassword(auth, email, pass);
         document.getElementById("login-box").style.display = "none";
     } catch (err){
-        alert("Error al iniciar sesión: " + (err.code || err.message));
+    if (err.code === "auth/weak-password") {
+        alert("La contraseña es muy débil. Debe tener al menos 6 caracteres.");
+    } else if (err.code === "auth/email-already-in-use") {
+        alert("Este correo ya está registrado. Prueba iniciando sesión.");
+    } else if (err.code === "auth/invalid-email") {
+        alert("El correo no tiene un formato válido.");
+    } else {
+        alert("Error al crear la cuenta: " + (err.code || err.message));
     }
 }
+
 
 async function registro(){
     const email    = document.getElementById("email").value.trim();
