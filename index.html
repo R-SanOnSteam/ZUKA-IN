@@ -172,15 +172,14 @@
     }
 
     #modal-close {
-    position: absolute;
-    top: 25px;
-    right: 35px;
-    font-size: 40px;
-    color: white;
-    cursor: pointer;
-    z-index: 9999;
-}
-
+        position: absolute;
+        top: 25px;
+        right: 35px;
+        font-size: 40px;
+        color: white;
+        cursor: pointer;
+        z-index: 9999;
+    }
 
     /* 📱 MÓVIL */
     @media (max-width: 899px) {
@@ -444,8 +443,6 @@ import {
   updateProfile
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-
-
 const firebaseConfig = {
   apiKey: "AIzaSyC5_uT5UamAEd7mDQFsI4xRFYw6GzCQ8Eg",
   authDomain: "zuka-in.firebaseapp.com",
@@ -582,14 +579,8 @@ async function registro(){
             username
         }));
 
-        // ✅ SIN enviar correo de verificación
-        // ✅ SIN alert de "te enviamos un correo"
-
         // Cerramos el modal de login
         document.getElementById("login-box").style.display = "none";
-
-        // onAuthStateChanged detecta que ya está logueado
-        // y mostrará el avatar automáticamente :)
 
     } catch (err){
         if (err.code === "auth/weak-password") {
@@ -604,8 +595,6 @@ async function registro(){
     }
 }
 
-
-
 /* ===============  PERFIL (AVATAR + PANEL)  =============== */
 
 window.togglePerfil = function(){
@@ -613,16 +602,42 @@ window.togglePerfil = function(){
     box.style.display = box.style.display === "block" ? "none" : "block";
 };
 
+/* ✅ FUNCIÓN CORREGIDA: usa el username que puso el usuario */
 function cargarPerfil(user){
-    if(!user) return;
+    if (!user) return;
 
     const extra = JSON.parse(localStorage.getItem("userProfileExtra") || "null");
 
-    const username = user.displayName || (extra ? extra.username : "user");
-    const nombreCompleto = extra ? (extra.nombre + " " + extra.apellido) : "";
+    let username = "";
+    let nombreCompleto = "";
 
-    document.getElementById("perfilUsername").textContent = "@"+username;
-    document.getElementById("perfilNombre").textContent   = nombreCompleto;
+    // 1️⃣ Primero lo que guardaste al registrarse
+    if (extra) {
+        if (extra.username) {
+            username = extra.username;
+        }
+        if (extra.nombre || extra.apellido) {
+            nombreCompleto = (extra.nombre || "") + " " + (extra.apellido || "");
+        }
+    }
+
+    // 2️⃣ Luego displayName de Firebase
+    if (!username && user.displayName) {
+        username = user.displayName;
+    }
+
+    // 3️⃣ Si no hay nada, parte del correo
+    if (!username && user.email) {
+        username = user.email.split("@")[0];
+    }
+
+    // 4️⃣ Último recurso
+    if (!username) {
+        username = "user";
+    }
+
+    document.getElementById("perfilUsername").textContent = "@" + username;
+    document.getElementById("perfilNombre").textContent   = nombreCompleto.trim();
     document.getElementById("perfilEmail").textContent    = user.email || "";
 }
 
