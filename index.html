@@ -441,9 +441,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  updateProfile,
-  sendEmailVerification
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
 
 
 const firebaseConfig = {
@@ -570,24 +570,26 @@ async function registro(){
     try{
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
 
-        // Guardamos displayName como username
+        // Guardamos username como displayName en Firebase
         await updateProfile(cred.user, {
             displayName: username
         });
 
-        // Guardar datos extra en localStorage
+        // Guardamos datos extra solo para mostrar en el perfil
         localStorage.setItem("userProfileExtra", JSON.stringify({
             nombre,
             apellido,
             username
         }));
 
-        // 🔥 ENVIAR EMAIL DE VERIFICACIÓN
-        await sendEmailVerification(cred.user);
+        // ✅ SIN enviar correo de verificación
+        // ✅ SIN alert de "te enviamos un correo"
 
-        alert("Cuenta creada con éxito. Revisa tu correo para verificar tu cuenta.");
-
+        // Cerramos el modal de login
         document.getElementById("login-box").style.display = "none";
+
+        // onAuthStateChanged detecta que ya está logueado
+        // y mostrará el avatar automáticamente :)
 
     } catch (err){
         if (err.code === "auth/weak-password") {
@@ -595,12 +597,13 @@ async function registro(){
         } else if (err.code === "auth/email-already-in-use") {
             alert("Este correo ya está registrado. Prueba iniciando sesión.");
         } else if (err.code === "auth/invalid-email") {
-            alert("El correo no tiene un formato válido.");
+            alert("El correo no es válido.");
         } else {
             alert("Error al crear la cuenta: " + (err.code || err.message));
         }
     }
 }
+
 
 
 /* ===============  PERFIL (AVATAR + PANEL)  =============== */
